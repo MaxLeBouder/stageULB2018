@@ -17,7 +17,7 @@ struct read_encoding{
 	int anchor_number;
 	int read_position;
 	string path_direction;
-	//~ string missmatches_encoding;
+	string missmatches_encoding;
 };
 
 
@@ -60,8 +60,6 @@ uint stringToInt(const string& str){
 }
 
 
-
-
 int main(int argc, char ** argv){
 	if(argc<2){
 		cout<<"[path file]"<<endl;
@@ -96,28 +94,33 @@ int main(int argc, char ** argv){
 			read_position=0;
 		}
 		getline(in,parse,'\n');
-		//~ string mismatches_encoding(parse);
-		reads.push_back({anchor_number,read_position,path_direction});
+		string mismatches_encoding(parse);
+		reads.push_back({anchor_number,read_position,path_direction, mismatches_encoding});
 	}
 
 	sort(reads.begin(),reads.end(),acompare);
 	//INPUT SORTED
 
-
-
+	ofstream streampaths("sortedPaths");
+	ofstream streammismatchs("sortedMis");
 
 	//A MODIFIER POUR LA COMPRESSION
 	int anchor_number_abs;
 	int pos_diff;
 	read_encoding read_prec;
 	bool sign_change = false;
+	uint j;
+	std::string positionMismatch;
+	char letterMismatch;
+	vector<int> vPos;
+	vector<int> vSeq;
 
 	for(uint i(0);i<reads.size();++i){
 		sign_change = false;
 
 	    //If anchor is 0
 		if(reads[i].anchor_number == 0){
-			cout<<reads[i].anchor_number<<":"<<reads[i].path_direction<<":"<<reads[i].read_position;
+			streampaths<<reads[i].anchor_number<<":"<<reads[i].path_direction<<":"<<reads[i].read_position;
 		}else{
 	        //ANCHOR NUMBER
 			if(abs(reads[i].anchor_number) != abs(read_prec.anchor_number)){
@@ -126,27 +129,27 @@ int main(int argc, char ** argv){
 				anchor_number_abs -= abs(read_prec.anchor_number);
 
 	           //Writing anchor_number absolute value
-				cout<<";";
-				cout<<endl;
-				cout<<anchor_number_abs<<":"; 
+				streampaths<<";";
+				streampaths<<endl;
+				streampaths<<anchor_number_abs<<":"; 
 
 				//Retrieving the first sign
 				sign_change = true;
 				if(reads[i].anchor_number < 0){
-					cout<<"-"; 
+					streampaths<<"-"; 
 				}else{
-					cout<<"+"; 
+					streampaths<<"+"; 
 				}
 
 	        //ANCHOR SIGN
 	        //If sign changes from positive to negative
 			}else if(reads[i].anchor_number < 0 && read_prec.anchor_number > 0){
 				sign_change = true;
-				cout<<"-"; 
+				streampaths<<"-"; 
 	        //If sign changes from negative to positive
 			}else if(reads[i].anchor_number > 0 && read_prec.anchor_number < 0){
 				sign_change = true;
-				cout<<"+"; 
+				streampaths<<"+"; 
 			}
 
 	        //PATH DIRECTION
@@ -154,16 +157,83 @@ int main(int argc, char ** argv){
 	            //READ POSITION
 				if(reads[i].read_position != read_prec.read_position){
 					pos_diff = (reads[i].read_position-read_prec.read_position);
-					cout<<"#"<<pos_diff;
+					streampaths<<"#"<<pos_diff;
 				}
 			}else{
-				cout<<"|"<<reads[i].path_direction<<":"<<reads[i].read_position;
+				streampaths<<"|"<<reads[i].path_direction<<":"<<reads[i].read_position;
 			}
 
 		}
 	    //Ajout du reste
 	    //cout<<":"<<reads[i].path_direction<<":"<<reads[i].read_position<<endl;
+
+		//Traitement du mismatch
+		//Si il y a un mismatch pour ce read
+		uint next_mismatch = 0;
+		if(reads[i].missmatches_encoding.compare("") != 0){
+			//Lecture et separation du missmatch
+			for(j=0; j<reads[i].missmatches_encoding.size(); j++){
+				if(reads[i].missmatches_encoding[j] == ':'){
+					letterMismatch = reads[i].missmatches_encoding[j-1];
+					positionMismatch = reads[i].missmatches_encoding.substr(next_mismatch,j-1);
+					vPos.push_back(std::stoi(positionMismatch));
+					vSeq.push_back(letterMismatch);
+
+					next_mismatch = j+1;
+				}
+			}
+			//TEMPORAIRE
+			//streammismatchs<<anchor_number_abs<<":";
+			//streammismatchs<<positionMismatch;
+			//streammismatchs<<letterMismatch;
+			
+		}
+
+
+		//Séparateurs pour les mismatchs dans le vecteur
+		vPos.push_back(-1);
+		vSeq.push_back(-1);
+
+		//test
+		//streammismatchs<<reads[i].missmatches_encoding<<endl;
+
 		read_prec = reads[i];
+	}
+
+
+	//Parcours des vecteurs par bloc de 1000 
+	/* Temporaires */
+	streammismatchs<<"1000"<<endl;
+	streammismatchs<<vPos.size()<<endl;
+	streammismatchs<<vSeq.size()<<endl;
+
+	//Parcours du vecteur des positions de mismatch, encodage des positions en ASCII
+	for(uint i=0; i<vPos.size(); i++){
+		if(vPos[i] != -1){
+			char pos = '0' + vPos[i];
+			streammismatchs<<pos;
+		}
+		else{
+			streammismatchs<<";";
+		}
+	}
+
+	streammismatchs<<endl<<endl;
+
+	//Parcours du vecteur de valeur de mismatch, encodage des mismatch 4 par 4
+	unsigned char mismatch4;
+	int cmpt_bit = 8;
+	for(uint i=0; i<vSeq.size(); i++){
+		if(vSeq[i] != -1){
+			mismatch4 += vSeq[i]-1;
+			mismatch4 <<= 2 ;
+			cmpt_bit -=2;
+
+			if(cmpt_bit == 0){
+				streammismatchs<<mismatch4;
+				cmpt_bit = 8;
+			}
+		}
 	}
 }
 
@@ -179,16 +249,16 @@ make rebuild
 ./bgreat -u sim1.fa -k 31 -g ecoli_31.unitigs.fa -C
 
 --Tri des chemins
-./sortPaths paths0 > sortedPaths0
+./sortstreamPaths streampaths0 > sortedstreamPaths0
 
 --Compression gzip -1
-gzip -1 sortedPaths0 -c > sortedPaths01.gz
+gzip -1 sortedstreamPaths0 -c > sortedstreamPaths01.gz
 
 --list + tailles
 ll -h
 
 --Compression gzip -9
-gzip -9 sortedPaths0 -c > sortedPaths09.gz
+gzip -9 sortedstreamPaths0 -c > sortedstreamPaths09.gz
 
 */
 
