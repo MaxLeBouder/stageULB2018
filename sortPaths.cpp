@@ -154,7 +154,7 @@ int main(int argc, char ** argv){
 
 	    //If anchor is 0
 		if(reads[i].anchor_number == 0){
-			streampaths<<reads[i].anchor_number<<anchor_separator<<anchor_separator<<endl; /*<<path_separator<<reads[i].path_direction<<':'<<reads[i].read_position<<anchor_separator;*/
+			streampaths<<reads[i].anchor_number<<anchor_separator<<anchor_separator<<anchor_separator<<endl; /*<<path_separator<<reads[i].path_direction<<':'<<reads[i].read_position<<anchor_separator;*/
 		}else{
 	        //ANCHOR NUMBER
 
@@ -236,7 +236,7 @@ int main(int argc, char ** argv){
 				first = true;
 			}*/
 
-			streampaths<<reads[i].path_direction<<anchor_separator<<reads[i].read_position<<anchor_separator<<endl;
+			streampaths<<reads[i].path_direction<<anchor_separator<<(char)reads[i].read_position<<anchor_separator<<endl;
 			
 		}
 

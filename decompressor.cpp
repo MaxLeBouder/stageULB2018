@@ -49,7 +49,7 @@ int main(int argc, char ** argv){
 
 	//INPUT
 
-	string parse, parse_path, parse_pos, path;
+	std::string parse, parse_path, parse_pos, path;
 	read_encoding read_prec;
 	int anchor_value;
 	int anchor_prec = 0;
@@ -63,11 +63,14 @@ int main(int argc, char ** argv){
 		if(not parse.empty()){
 			//Retrieve anchor value and convert it to integer
 			std::istringstream anchor(parse);
+
+			//TEMP
 			if(parse == "-"){
 				neg = 1;
 			}else if (parse == "+"){
 				neg = 0;
 			}else{
+
 				anchor >> anchor_value;	
 				//anchor_value = str_bin_to_int(parse);
 				//The anchor value is equals to the previous value and the current relative position
@@ -79,14 +82,23 @@ int main(int argc, char ** argv){
 
 				getline(in,path,(char)255);
 				getline(in,parse_pos,(char)255);
-				position = atoi(parse_pos.c_str());
 
-
+				string parse_posstring = parse_pos.c_str();
+				if(parse_posstring.size() != 0){
+					cout<<parse_posstring;
+					position = (int)parse_posstring[0];
+					cout<<position;
+					cout<<endl;
+				}else{
+					position = 0;
+				}
+				
 				reads.push_back({anchor_value,position,path});
 			}
 		}
 
 		getline(in,parse,(char)10);
+		//TEMP
 
 		//Reading paths for the positive anchor
 		/*
@@ -192,7 +204,10 @@ int main(int argc, char ** argv){
 		if(not reads[i].path_direction.empty()){
 			stream_paths<<":"<<reads[i].path_direction;
 		}
-		stream_paths<<":"<<reads[i].read_position;
+		if(reads[i].read_position >= 0){
+			stream_paths<<":"<<reads[i].read_position;
+		}
+		
 	
 		stream_paths<<":"<<endl;
 	}
