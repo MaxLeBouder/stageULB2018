@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#define DEBUG 0
+#define DEBUG 1
 
 struct read_encoding{
 	int anchor_number;
@@ -36,7 +36,8 @@ bool acompare(read_encoding y, read_encoding x) {
 	if(abs(x.anchor_number)<abs(y.anchor_number)){return false;}
 	//Pour comparer les signes
 	if(abs(x.anchor_number)==abs(y.anchor_number)){
-		if((x.anchor_number)<(y.anchor_number)){return false;}
+		if((x.anchor_number)<(y.anchor_number)){return true;}
+		if((x.anchor_number)>(y.anchor_number)){return false;}
 	}
 
 	if(x.read_position>y.read_position){return true;}
@@ -61,9 +62,9 @@ uint stringToInt(const string& str){
 	return res;
 }
 
-string anchor_compression(int prec_anchor_number, int anchor_number){
+uint32_t anchor_compression(int prec_anchor_number, int anchor_number){
 	unsigned int anchor_number_abs;
-	std::string anchor_read;
+	uint32_t anchor_read;
 
 	//Retrieving anchor absolute value
 	anchor_number_abs = abs(anchor_number);
@@ -71,7 +72,12 @@ string anchor_compression(int prec_anchor_number, int anchor_number){
 
 	//Compressing anchor absolute value into 4 Bytes
 	//Writing anchor_number absolute value
-	anchor_read += (uint32_t)anchor_number_abs;
+	anchor_read = (uint32_t)anchor_number_abs;
+	/*
+	anchor_read[0] = (uint32_t)((anchor_number_abs >> 24) & 0xFF);
+	anchor_read[1] = (uint32_t)((anchor_number_abs >> 16) & 0xFF);
+	anchor_read[2] = (uint32_t)((anchor_number_abs >> 8) & 0xFF);
+	anchor_read[3] = (uint32_t)((anchor_number_abs) & 0xFF);*/
 
 	return anchor_read;
 }
@@ -126,8 +132,8 @@ int main(int argc, char ** argv){
 
 
 
-	ofstream streampaths("sortedPaths2");
-	ofstream streammismatchs("sortedMis2");
+	ofstream streampaths("sortedPaths_perfect13_anchorOnly");
+	ofstream streammismatchs("sortedMis_perfect13_anchorOnly");
 
 	//COMPRESSION
 	int pos_diff;
@@ -140,7 +146,7 @@ int main(int argc, char ** argv){
 	vector<int> vSeq;
 	bool first = false;
 
-	std::string anchor_read;
+	uint32_t anchor_read;
 	char anchor_separator = (char)255;
 	char path_separator = (char)254;
 
@@ -148,10 +154,23 @@ int main(int argc, char ** argv){
 
 	    //If anchor is 0
 		if(reads[i].anchor_number == 0){
-			streampaths<<reads[i].anchor_number<<anchor_separator<<path_separator<<reads[i].path_direction<<reads[i].read_position<<anchor_separator;
+			streampaths<<reads[i].anchor_number<<anchor_separator<<anchor_separator<<endl; /*<<path_separator<<reads[i].path_direction<<':'<<reads[i].read_position<<anchor_separator;*/
 		}else{
 	        //ANCHOR NUMBER
 
+			//TEMP
+			anchor_read = anchor_compression(read_prec.anchor_number, reads[i].anchor_number);
+			if(read_prec.anchor_number != reads[i].anchor_number){
+				if (reads[i].anchor_number < 0){
+					streampaths<<"-"<<anchor_separator<<endl;
+				}else{
+					streampaths<<"+"<<anchor_separator<<endl;
+				}
+			}
+			streampaths<<anchor_read;
+			streampaths<<anchor_separator;
+
+			/*
 			if(abs(reads[i].anchor_number) != abs(read_prec.anchor_number)){
 				//If the previous anchor had positives but no negative, add a separator
 				if(read_prec.anchor_number>0){
@@ -182,10 +201,16 @@ int main(int argc, char ** argv){
 					streampaths<<anchor_separator;
 					if(DEBUG){streampaths<<"-";}
 				}
-			}
+			}*/
+
+			
+		
 
 	        //PATH DIRECTION
+	        
+	        /*
 			if((reads[i].path_direction.compare(read_prec.path_direction) == 0) && (reads[i].anchor_number == read_prec.anchor_number)){
+				
 	            //READ POSITION
 				if(reads[i].read_position != read_prec.read_position){
 					//If the current position is different from the previous position for the same path, then we only display the difference between the two positions, assumed to be a single byte
@@ -193,23 +218,31 @@ int main(int argc, char ** argv){
 					if(first){
 						streampaths<<"#";
 					}
-					streampaths<<char(pos_diff);
+					streampaths<<(unsigned char)(pos_diff);
 					first = false;
-
+				}else{
+					pos_diff = 0;
+					if(first){
+						streampaths<<"#";
+					}
+					streampaths<<(unsigned char)(pos_diff);
+					first = false;
 				}
+				
 			}else{
 				//First position followed by a separator
-				char pos = char(reads[i].read_position);
+				unsigned char pos = (unsigned char)(reads[i].read_position);
 				streampaths<<path_separator<<reads[i].path_direction<<":"<<pos;
 				first = true;
-			}
+			}*/
 
+			streampaths<<reads[i].path_direction<<anchor_separator<<reads[i].read_position<<anchor_separator<<endl;
+			
 		}
 
 
-
-
 		//MISMATCH
+		/*
 		uint next_mismatch = 0;
 		int pos_mismatch;
 		//If there is a mismatch for this read
@@ -237,12 +270,14 @@ int main(int argc, char ** argv){
 		//Separator for the reads in the vectors
 		vPos.push_back(-1);
 		vSeq.push_back(-1);
-
+		*/
 		read_prec = reads[i];
+		
 	}
 
-
 	//READING THE VECTORS
+
+	/*
 
 	//DEBUG
 	if(DEBUG){
@@ -314,7 +349,10 @@ int main(int argc, char ** argv){
 		if(DEBUG){
 			streammismatchs<<endl<<endl;
 		}
+
 	}
+
+	*/
 
 	//Dernière marque pour la fin
 	streampaths<<anchor_separator;
