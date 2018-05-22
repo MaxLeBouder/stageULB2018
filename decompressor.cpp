@@ -197,19 +197,11 @@ int main(int argc, char ** argv){
 					pos_prec = 0;
 					//Read the compressed path
 					getline(parse_s,path,':');
-
-					parse_s.get(current);
 				}
-				if(current == (char)253){
-					parse_s.get(current);
-				}else{
-					position = (int)current;
-					position += pos_prec;
-					reads.push_back({anchor_value,position,path});
-					pos_prec = position;
-
-					parse_s.get(current);
-				}
+				std::string pos;
+				getline(parse_s,pos,(char)253);
+				position = atoi(pos.c_str());
+				reads.push_back({anchor_value,position,path});
 				//FIN TEMP
 			}
 		}

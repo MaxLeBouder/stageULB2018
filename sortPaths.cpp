@@ -242,7 +242,7 @@ int main(int argc, char ** argv){
 
 			//TEMP position ASCII + separateurs
 			char pos_separator = (char)253;
-			char position_ascii;
+			char position_ascii[10];
 
 			if(reads[i].path_direction.compare(read_prec.path_direction) != 0){
 				streampaths<<path_separator<<reads[i].path_direction<<":";
