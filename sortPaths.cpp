@@ -200,15 +200,18 @@ int main(int argc, char ** argv){
 	        
 			if((reads[i].path_direction.compare(read_prec.path_direction) == 0) && (reads[i].anchor_number == read_prec.anchor_number)){
 				
+				
 	            //READ POSITION
 				if(reads[i].read_position != read_prec.read_position){
 					//If the current position is different from the previous position for the same path, then we only display the difference between the two positions, assumed to be a single byte
-					pos_diff = (reads[i].read_position-read_prec.read_position);
+			//		pos_diff = (reads[i].read_position-read_prec.read_position);
+					pos_diff = 0;
 					if(first){
 						streampaths<<"#";
 					}
 					streampaths<<(unsigned char)(pos_diff);
 					first = false;
+				//There's multiple occurence of the same anchor-path-position
 				}else{
 					pos_diff = 0;
 					if(first){
@@ -220,7 +223,8 @@ int main(int argc, char ** argv){
 				
 			}else{
 				//First position followed by a separator
-				unsigned char pos = (unsigned char)(reads[i].read_position);
+			//	unsigned char pos = (unsigned char)(reads[i].read_position);
+				unsigned char pos = '1';
 				streampaths<<path_separator<<reads[i].path_direction<<":"<<pos;
 				first = true;
 			}
