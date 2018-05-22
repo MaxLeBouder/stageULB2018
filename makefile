@@ -23,9 +23,21 @@ endif
 
 
 
-EXEC=bgreat numbersToSequences sortPaths
+EXEC=bgreat numbersToSequences sortPaths sortPaths_sortOnly decompressor
 
 all: $(EXEC)
+
+decompressor: decompressor.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+decompressor.o: decompressor.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+sortPaths_sortOnly: sortPaths_sortOnly.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+sortPaths_sortOnly.o: sortPaths_sortOnly.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)	
 
 sortPaths: sortPaths.o
 	$(CC) -o $@ $^ $(LDFLAGS)
