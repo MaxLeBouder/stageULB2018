@@ -55,7 +55,6 @@ int main(int argc, char ** argv){
 	int anchor_prec = 0;
 	int position;
 	int pos_prec = 0;
-	int neg = 0;
 
 	while(not in.eof()){
 		//Reading anchor absolute value
@@ -63,45 +62,17 @@ int main(int argc, char ** argv){
 		if(not parse.empty()){
 			//Retrieve anchor value and convert it to integer
 			std::istringstream anchor(parse);
+			anchor >> anchor_value;	
+			//anchor_value = str_bin_to_int(parse);
 
-			//TEMP
-			if(parse == "-"){
-				neg = 1;
-			}else if (parse == "+"){
-				neg = 0;
-			}else{
+			//The anchor value is equals to the previous value and the current relative position
+			anchor_value = abs(anchor_value) + abs(anchor_prec);
 
-				anchor >> anchor_value;	
-				//anchor_value = str_bin_to_int(parse);
-				//The anchor value is equals to the previous value and the current relative position
-				anchor_value = abs(anchor_value) + abs(anchor_prec);
-				if(neg == 1){
-					anchor_value = -anchor_value;
-				}
-				anchor_prec = anchor_value;
-
-				getline(in,path,(char)255);
-				getline(in,parse_pos,(char)255);
-
-				string parse_posstring = parse_pos.c_str();
-				if(parse_posstring.size() != 0){
-					cout<<parse_posstring;
-					position = (int)parse_posstring[0];
-					cout<<position;
-					cout<<endl;
-				}else{
-					position = 0;
-				}
-				
-				reads.push_back({anchor_value,position,path});
-			}
+			anchor_prec = anchor_value;
 		}
 
-		getline(in,parse,(char)10);
-		//TEMP
-
 		//Reading paths for the positive anchor
-		/*
+		
 		getline(in,parse,(char)255);
 		if(not parse.empty()){											
 			//if(DEBUG){cout<<"Ancre positive"<<endl;}
@@ -189,25 +160,21 @@ int main(int argc, char ** argv){
 				parse_s.get(current);
 			}
 		}
-		*/
-
+		
 	}
 	//End of reading
 
 	//Writing the path on a file
-	ofstream stream_paths("decompressedPaths_13_anchorOnly");
+	ofstream stream_paths("decompressedPaths_13");
 
 	if(DEBUG){cout<<endl<<"Ecriture : "<<reads.size()<<" reads"<<endl;}
 	for(uint i(0); i<reads.size(); ++i){
 		//if(DEBUG){cout<<i+1<<"/"<<reads.size()<<endl;}
-		stream_paths<<reads[i].anchor_number; /*<<":"; */
+		stream_paths<<reads[i].anchor_number<<":"; 
 		if(not reads[i].path_direction.empty()){
-			stream_paths<<":"<<reads[i].path_direction;
+			stream_paths<<reads[i].path_direction;
 		}
-		if(reads[i].read_position >= 0){
-			stream_paths<<":"<<reads[i].read_position;
-		}
-		
+		stream_paths<<":"<<reads[i].read_position;
 	
 		stream_paths<<":"<<endl;
 	}
