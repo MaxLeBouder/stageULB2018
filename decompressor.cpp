@@ -82,6 +82,8 @@ int main(int argc, char ** argv){
 			char current;
 			parse_s.get(current);
 			while(not parse_s.eof()){
+
+				/*
 				if(current == (char)254){
 					pos_prec = -1;
 					//Read the compressed path
@@ -111,6 +113,31 @@ int main(int argc, char ** argv){
 
 				//Get the next character in the parse stream
 				parse_s.get(current);
+
+				*/
+
+				//TEMP
+				if(current == (char)254){
+					pos_prec = 0;
+					//Read the compressed path
+					getline(parse_s,path,':');
+
+					parse_s.get(current);
+				}
+				if(current == (char)253){
+					parse_s.get(current);
+				}else{
+					position = (int)current;
+					if(current == '0'){
+						position = 0;
+					}
+					position += pos_prec;
+					reads.push_back({anchor_value,position,path});
+					pos_prec = position;
+
+					parse_s.get(current);
+				}
+				//FIN TEMP
 			}
 		}
 
@@ -128,7 +155,11 @@ int main(int argc, char ** argv){
 			std::stringstream parse_s(parse);
 			char current;
 			parse_s.get(current);
+
 			while(not parse_s.eof()){
+
+				/*
+
 				if(current == (char)254){
 					pos_prec = -1;
 					//Read the compressed path
@@ -158,6 +189,28 @@ int main(int argc, char ** argv){
 
 				//Get the next character in the parse stream
 				parse_s.get(current);
+
+				*/
+
+				//TEMP
+				if(current == (char)254){
+					pos_prec = 0;
+					//Read the compressed path
+					getline(parse_s,path,':');
+
+					parse_s.get(current);
+				}
+				if(current == (char)253){
+					parse_s.get(current);
+				}else{
+					position = (int)current;
+					position += pos_prec;
+					reads.push_back({anchor_value,position,path});
+					pos_prec = position;
+
+					parse_s.get(current);
+				}
+				//FIN TEMP
 			}
 		}
 		
