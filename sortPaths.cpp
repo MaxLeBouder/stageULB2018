@@ -73,15 +73,8 @@ uint32_t anchor_compression(int prec_anchor_number, int anchor_number){
 	anchor_number_abs = abs(anchor_number);
 	anchor_number_abs -= abs(prec_anchor_number);
 
-	//Compressing anchor absolute value into 4 Bytes
 	//Writing anchor_number absolute value
 	anchor_read = (uint32_t)anchor_number_abs;
-	/*
-	anchor_read[0] = (uint32_t)((anchor_number_abs >> 24) & 0xFF);
-	anchor_read[1] = (uint32_t)((anchor_number_abs >> 16) & 0xFF);
-	anchor_read[2] = (uint32_t)((anchor_number_abs >> 8) & 0xFF);
-	anchor_read[3] = (uint32_t)((anchor_number_abs) & 0xFF);*/
-
 	return anchor_read;
 }
 
@@ -200,15 +193,12 @@ int main(int argc, char ** argv){
 
 	        //PATH DIRECTION
 	        
-	        	/*
-	        
 			if((reads[i].path_direction.compare(read_prec.path_direction) == 0) && (reads[i].anchor_number == read_prec.anchor_number)){
 
 	            //READ POSITION
 				if(reads[i].read_position != read_prec.read_position){
 					//If the current position is different from the previous position for the same path, then we only display the difference between the two positions, assumed to be a single byte
-			//		pos_diff = (reads[i].read_position-read_prec.read_position);
-			//		pos_diff = 0;
+					pos_diff = (reads[i].read_position-read_prec.read_position);
 					if(first){
 						streampaths<<"#";
 					}
@@ -223,68 +213,18 @@ int main(int argc, char ** argv){
 					streampaths<<(unsigned char)(pos_diff);
 					first = false;
 				}
-
-				*/
-
-				/*
 				
 			}else{
 				//First position followed by a separator
-			//	unsigned char pos = (unsigned char)(reads[i].read_position);
-				unsigned char pos = '1';
-				streampaths<<path_separator<<reads[i].path_direction<<":"<<pos;
-				first = true;
-			}
-
-				*/
-
-			
-
-			//TEMP position ASCII + separateurs
-			char pos_separator = (char)253;
-			char position_ascii[10];
-
-			if(reads[i].path_direction.compare(read_prec.path_direction) != 0){
-				streampaths<<path_separator<<reads[i].path_direction<<":";
-
-				//first position to ASCII
-
-				//std::ostringstream pos;
-				//pos << (int)reads[i].read_position;
-				//std::string position_ascii = std::to_string(reads[i].read_position);
-				//position_ascii = '0' + reads[i].read_position;
-
 				if(reads[i].read_position >= 253 && reads[i].read_position <= 255){
 					cout<<"Erreur valeur position ancre : "<<reads[i].anchor_number<<" pos : "<< reads[i].read_position <<endl;
-					position_ascii = '0';
+					char erreur = '0';
+					streampaths<<path_separator<<reads[i].path_direction<<":"<<erreur;
 				}else{
-					position_ascii = (unsigned char)reads[i].read_position;
+					streampaths<<path_separator<<reads[i].path_direction<<":"<<reads[i].read_position;
 				}
-				
-				streampaths << position_ascii;
-				streampaths << pos_separator;
-
-			}else{
-				//next position to ASCII
-
-				//std::ostringstream pos;
-				//pos << (int)(reads[i].read_position - read_prec.read_position);
-				//position_ascii = '0' + (reads[i].read_position - read_prec.read_position);
-				//std::string position_ascii = std::to_string(reads[i].read_position - read_prec.read_position);
-
-				pos_diff = (reads[i].read_position - read_prec.read_position);
-
-				if(pos_diff >= 253 && pos_diff <= 255){
-					position_ascii = '0';
-				}else{
-					position_ascii = (unsigned char)pos_diff;
-				}
-				
-				streampaths << position_ascii;
-				streampaths << pos_separator;
+				first = true;
 			}
-
-			//END TEMP
 			
 		}
 
