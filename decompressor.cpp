@@ -20,21 +20,13 @@ struct read_encoding{
 };
 
 vector<string> split(const string &s, char delim){
-    stringstream ss(s);
-    string item;
-    vector<string> elems;
-    while (getline(ss, item, delim)) {
-        elems.push_back(move(item)); 
-    }
-    return elems;
-}
-
-uint32_t str_bin_to_int(const string& str){
-    uint32_t res(0);
-    for(uint i(0);i<4;++i){
-        res+=(unsigned char)(str[3-i]<<(4*i));
-    }
-    return res;
+	stringstream ss(s);
+	string item;
+	vector<string> elems;
+	while (getline(ss, item, delim)) {
+		elems.push_back(move(item)); 
+	}
+	return elems;
 }
 
 int main(int argc, char ** argv){
@@ -88,184 +80,97 @@ int main(int argc, char ** argv){
 		
 		getline(in,parse,(char)255);
 		if(not parse.empty()){											
-			//if(DEBUG){cout<<"Ancre positive"<<endl;}
 
-			//Reading path and positions
-			std::stringstream parse_s(parse);
-			char current;
-			parse_s.get(current);
-			bool multiple_pos = false;
-			while(not parse_s.eof()){
+			//SPLIT
+			vector<string> v_paths = split(parse,(char)254);
+			for(uint i(0);i<v_paths.size();i++){
+				std::string path = v_paths[i];
+				if(not path.empty()){
+					std::stringstream path_s(path);
+					char current;
 
-				/*
-				if(current == (char)254){
-					pos_prec = -1;
-					//Read the compressed path
-					getline(parse_s,path,':');
-					//Read the first position
-					parse_s.get(current);
-					if(current == '0'){
-						position = 0;
-					}else{
-						position = (unsigned char)current;
-					}
-					//Push the read with the first position
-					reads.push_back({anchor_value,position,path});
-
-					int next = parse_s.peek();
-					//If there's a multiple position sign
-					if(next == '#'){
-						pos_prec = position;
-						parse_s.get(current); //To discard the '#'
-					}
-				//If we're reading relative positions after a '#', then pos_prec is set
-				}else if(pos_prec > -1){
-					position = pos_prec + (unsigned char)current;
-					reads.push_back({anchor_value,position,path});
-					pos_prec = position;
-				}
-
-				//Get the next character in the parse stream
-				parse_s.get(current);
-
-				*/
-
-				//TEMP
-				if(current == (char)254){
 					pos_prec = 0;
-					getline(parse_s,path,':');
-					std::size_t multiple_pos_separator = parse_s.str().find('#');
-					std::size_t path_separator;
+					getline(path_s,path,':');
 
+					std::size_t multiple_pos_separator = path_s.str().find('#');
 					if(multiple_pos_separator == std::string::npos){
-						path_separator = parse_s.str().find((char)254);
-						if(path_separator == std::string::npos){
-							getline(parse_s,parse_pos);
-						}else{
-							getline(parse_s,parse_pos,(char)254);
-							parse_s.get(current);
-						}
-						
+						getline(path_s,parse_pos);
 						position = atoi(parse_pos.c_str());
-						multiple_pos = false;
 						if(DEBUG){cout<<"Position initiale (unique) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+
+						reads.push_back({anchor_value,position,path});
 					}else{
-						getline(parse_s,parse_pos,'#');
+						getline(path_s,parse_pos,'#');
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (multiple) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+						reads.push_back({anchor_value,position,path});
 						pos_prec = position;
-						multiple_pos = true;
-						parse_s.get(current);
+
+						path_s.get(current);
+
+						while(not path_s.eof()){
+							position = pos_prec + (int)((unsigned char)current);
+							pos_prec = position;
+
+							reads.push_back({anchor_value,position,path});
+							if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
+
+							path_s.get(current);
+						}
 					}
-
-					reads.push_back({anchor_value,position,path});
 				}
-				if(multiple_pos){
-					position = pos_prec + (int)((unsigned char)current);
-					pos_prec = position;
-					
-					reads.push_back({anchor_value,position,path});
-					if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
-				}
-
-				parse_s.get(current);
-				//FIN TEMP
 			}
+			//ENDSPLIT
 		}
-
 
 
 		//Reading paths for the negative anchor
 		getline(in,parse,(char)255);
 		if(not parse.empty()){											
-			//if(DEBUG){cout<<"Ancre negative"<<endl;}
 
 			//The anchor value is negative
 			anchor_value = -anchor_value;
 
-			//Reading path and positions
-			std::stringstream parse_s(parse);
-			char current;
-			parse_s.get(current);
-			bool multiple_pos = false;
+			//SPLIT
+			vector<string> v_paths = split(parse,(char)254);
+			for(uint i(0);i<v_paths.size();i++){
+				std::string path = v_paths[i];
+				if(not path.empty()){
+					std::stringstream path_s(path);
+					char current;
 
-			while(not parse_s.eof()){
-
-				/*
-
-				if(current == (char)254){
-					pos_prec = -1;
-					//Read the compressed path
-					getline(parse_s,path,':');
-					//Read the first position
-					parse_s.get(current);
-					if(current == '0'){
-						position = 0;
-					}else{
-						position = (unsigned char)current;
-					}
-					//Push the read with the first position
-					reads.push_back({anchor_value,position,path});
-
-					int next = parse_s.peek();
-					//If there's a multiple position sign
-					if(next == '#'){
-						pos_prec = position;
-						parse_s.get(current); //To discard the '#'
-					}
-				//If we're reading relative positions after a '#', then pos_prec is set
-				}else if(pos_prec > -1){
-					position = pos_prec + (unsigned char)current;
-					reads.push_back({anchor_value,position,path});
-					pos_prec = position;
-				}
-
-				//Get the next character in the parse stream
-				parse_s.get(current);
-
-				*/
-
-				//TEMP
-				if(current == (char)254){
 					pos_prec = 0;
-					getline(parse_s,path,':');
-					std::size_t multiple_pos_separator = parse_s.str().find('#');
-					std::size_t path_separator;
+					getline(path_s,path,':');
 
+					std::size_t multiple_pos_separator = path_s.str().find('#');
 					if(multiple_pos_separator == std::string::npos){
-						path_separator = parse_s.str().find((char)254);
-						if(path_separator == std::string::npos){
-							getline(parse_s,parse_pos);
-						}else{
-							getline(parse_s,parse_pos,(char)254);
-							parse_s.get(current);
-						}
-						
+						getline(path_s,parse_pos);
 						position = atoi(parse_pos.c_str());
-						multiple_pos = false;
 						if(DEBUG){cout<<"Position initiale (unique) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+
+						reads.push_back({anchor_value,position,path});
 					}else{
-						getline(parse_s,parse_pos,'#');
+						getline(path_s,parse_pos,'#');
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (multiple) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+						reads.push_back({anchor_value,position,path});
 						pos_prec = position;
-						multiple_pos = true;
-						parse_s.get(current);
+
+						path_s.get(current);
+
+						while(not path_s.eof()){
+							position = pos_prec + (int)((unsigned char)current);
+							pos_prec = position;
+
+							reads.push_back({anchor_value,position,path});
+							if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
+
+							path_s.get(current);
+						}
 					}
-
-					reads.push_back({anchor_value,position,path});
 				}
-				if(multiple_pos){
-					position = pos_prec + (int)((unsigned char)current);
-					pos_prec = position;
-					
-					reads.push_back({anchor_value,position,path});
-					if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
-				}
-
-				parse_s.get(current);
-				//FIN TEMP
 			}
+			//ENDSPLIT
 		}
 		
 	}
@@ -282,7 +187,7 @@ int main(int argc, char ** argv){
 			stream_paths<<reads[i].path_direction;
 		}
 		stream_paths<<":"<<reads[i].read_position;
-	
+
 		stream_paths<<":"<<endl;
 	}
 }

@@ -169,6 +169,7 @@ int main(int argc, char ** argv){
 				//Write new anchor value
 				anchor_read = anchor_compression(read_prec.anchor_number, reads[i].anchor_number);
 				streampaths<<anchor_read;
+				if(DEBUG){streampaths<<"("<<reads[i].anchor_number<<") ";}
 				streampaths<<anchor_separator;
 				if(DEBUG){streampaths<<"+";}
 
@@ -217,12 +218,9 @@ int main(int argc, char ** argv){
 			}else{
 				//First position followed by a separator
 				if(reads[i].read_position >= 253 && reads[i].read_position <= 255){
-					cout<<"Erreur valeur position ancre : "<<reads[i].anchor_number<<" pos : "<< reads[i].read_position <<endl;
-					char erreur = '0';
-					streampaths<<path_separator<<reads[i].path_direction<<":"<<erreur;
-				}else{
-					streampaths<<path_separator<<reads[i].path_direction<<":"<<reads[i].read_position;
+					cout<<"Risque d'erreur valeur position ancre : "<<reads[i].anchor_number<<" pos : "<< reads[i].read_position <<endl;
 				}
+				streampaths<<path_separator<<reads[i].path_direction<<":"<<reads[i].read_position;
 				first = true;
 			}
 			
