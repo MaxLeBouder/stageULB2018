@@ -36,8 +36,8 @@ bool acompare(read_encoding y, read_encoding x) {
 	if(abs(x.anchor_number)<abs(y.anchor_number)){return false;}
 	//Pour comparer les signes
 	if(abs(x.anchor_number)==abs(y.anchor_number)){
-		if((x.anchor_number)<(y.anchor_number)){return false;}
-		if((x.anchor_number)>(y.anchor_number)){return true;}
+		if((x.anchor_number)<(y.anchor_number)){return true;}
+		if((x.anchor_number)>(y.anchor_number)){return false;}
 	}
 
 	if(x.read_position>y.read_position){return true;}
@@ -124,8 +124,9 @@ int main(int argc, char ** argv){
 
 	for(uint i(0);i<reads.size();++i){
 		streampaths<<reads[i].anchor_number;
+		streampaths<<":";
 		if(not reads[i].path_direction.empty()){
-			streampaths<<":"<<reads[i].path_direction;	
+			streampaths<<reads[i].path_direction;	
 		} 
 		streampaths<<':'<<reads[i].read_position<<":"<<endl;
 	}
