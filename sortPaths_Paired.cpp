@@ -17,6 +17,7 @@ using namespace std;
 struct read_encoding{
 	int anchor_number;
 	int read_position;
+	int distance;
 	string path_direction;
 	string missmatches_encoding;
 };
@@ -48,6 +49,9 @@ bool acompare(read_encoding y, read_encoding x) {
 
 	if(x.path_direction>y.path_direction){return true;}
 	if(x.path_direction<y.path_direction){return false;}
+
+	if(x.distance>y.distance){return true;}
+	if(x.distance<y.distance){return false;}
 
 	return false;
 }
@@ -94,7 +98,7 @@ int main(int argc, char ** argv){
 	//INPUT
 
 	string parse;
-	int anchor_number,read_position;
+	int anchor_number,read_position, distance;
 	while(not in.eof()){
 		getline(in,parse,':');
 		if(not parse.empty()){
@@ -110,9 +114,12 @@ int main(int argc, char ** argv){
 		}else{
 			read_position=0;
 		}
+
+		/*Ajouter lecture de la distance*/
+
 		getline(in,parse,'\n');
 		string mismatches_encoding(parse);
-		reads.push_back({anchor_number,read_position,path_direction, mismatches_encoding});
+		reads.push_back({anchor_number,read_position,path_direction,distance,mismatches_encoding});
 	}
 
 	sort(reads.begin(),reads.end(),acompare);

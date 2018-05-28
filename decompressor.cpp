@@ -76,51 +76,66 @@ int main(int argc, char ** argv){
 			if(DEBUG){cout<<anchor_value<<';'<<endl;}
 		}
 
+
 		//Reading paths for the positive anchor
-		
 		getline(in,parse,(char)255);
 		if(not parse.empty()){											
 
-			//SPLIT
+			//Spliting each path into a vector
 			vector<string> v_paths = split(parse,(char)254);
 			for(uint i(0);i<v_paths.size();i++){
 				std::string path = v_paths[i];
 				if(not path.empty()){
+					//Using a stringstream to read the path
 					std::stringstream path_s(path);
 					char current;
 
 					pos_prec = 0;
+					//Retrieving the path until the start of positions delimiter
 					getline(path_s,path,':');
 
+					//If there's a # delimiter, then there will be multiple positions for this path
 					std::size_t multiple_pos_separator = path_s.str().find('#');
+					//If there's a single position
 					if(multiple_pos_separator == std::string::npos){
+						//Then all the remaining string in the path stream is the position
 						getline(path_s,parse_pos);
+						//Conversion from string to int
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (unique) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
 
+						//Pushing the read
 						reads.push_back({anchor_value,position,path});
 					}else{
+						//Retrieving the initial position, until the multiple position delimiter, which is discarded
 						getline(path_s,parse_pos,'#');
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (multiple) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+
+						//Pushing the read with the initial position
 						reads.push_back({anchor_value,position,path});
 						pos_prec = position;
 
+						//Get the first relative position
 						path_s.get(current);
 
+						//While there's still positions to read in the path stream
 						while(not path_s.eof()){
+							//Since the current position is relative to the previous one
 							position = pos_prec + (int)((unsigned char)current);
 							pos_prec = position;
 
+							//Push the read with the result position
 							reads.push_back({anchor_value,position,path});
 							if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
 
+							//Get next relative position
 							path_s.get(current);
 						}
 					}
 				}
 			}
-			//ENDSPLIT
+			//end of split paths
 		}
 
 
@@ -131,53 +146,68 @@ int main(int argc, char ** argv){
 			//The anchor value is negative
 			anchor_value = -anchor_value;
 
-			//SPLIT
+			//Spliting each path into a vector
 			vector<string> v_paths = split(parse,(char)254);
 			for(uint i(0);i<v_paths.size();i++){
 				std::string path = v_paths[i];
 				if(not path.empty()){
+					//Using a stringstream to read the path
 					std::stringstream path_s(path);
 					char current;
 
 					pos_prec = 0;
+					//Retrieving the path until the start of positions delimiter
 					getline(path_s,path,':');
 
+					//If there's a # delimiter, then there will be multiple positions for this path
 					std::size_t multiple_pos_separator = path_s.str().find('#');
+					//If there's a single position
 					if(multiple_pos_separator == std::string::npos){
+						//Then all the remaining string in the path stream is the position
 						getline(path_s,parse_pos);
+						//Conversion from string to int
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (unique) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
 
+						//Pushing the read
 						reads.push_back({anchor_value,position,path});
 					}else{
+						//Retrieving the initial position, until the multiple position delimiter, which is discarded
 						getline(path_s,parse_pos,'#');
 						position = atoi(parse_pos.c_str());
 						if(DEBUG){cout<<"Position initiale (multiple) : parse = "<<parse_pos<<" | valeur : "<<position<<endl;}
+
+						//Pushing the read with the initial position
 						reads.push_back({anchor_value,position,path});
 						pos_prec = position;
 
+						//Get the first relative position
 						path_s.get(current);
 
+						//While there's still positions to read in the path stream
 						while(not path_s.eof()){
+							//Since the current position is relative to the previous one
 							position = pos_prec + (int)((unsigned char)current);
 							pos_prec = position;
 
+							//Push the read with the result position
 							reads.push_back({anchor_value,position,path});
 							if(DEBUG){cout<<"--- Position suivante : + "<<(int)current<< " = " <<position<<endl;}
 
+							//Get next relative position
 							path_s.get(current);
 						}
 					}
 				}
 			}
-			//ENDSPLIT
+			//end of split paths
 		}
 		
 	}
 	//End of reading
 
 	//Writing the path on a file
-	ofstream stream_paths("decompressedPaths_13");
+	ofstream stream_paths("decompressedPaths_ecoli63_100x");
 
 	if(DEBUG){cout<<endl<<"Ecriture : "<<reads.size()<<" reads"<<endl;}
 	for(uint i(0); i<reads.size(); ++i){
