@@ -232,15 +232,21 @@ int main(int argc, char ** argv){
 		if(reads[i].missmatches_encoding.compare("") != 0){
 			//Mismatch reading and separation between the mismatch's position and value
 			for(j=0; j<reads[i].missmatches_encoding.size(); j++){
+				//Mismatch separator
 				if(reads[i].missmatches_encoding[j] == ':'){
+					//Retrieving the value and position of the mismatch
 					letterMismatch = reads[i].missmatches_encoding[j-1];
 					positionMismatch = reads[i].missmatches_encoding.substr(next_mismatch,j-1);
+					//If it's the first mismatch
 					if(next_mismatch == 0){
 						pos_mismatch = std::stoi(positionMismatch);
-						pos_mismatch = -(pos_mismatch);
+
+					//Else calculate the difference between this position and the previous one	
 					}else{
 						pos_mismatch = std::stoi(positionMismatch) - pos_mismatch;
 					}
+
+					//Push the values into the vectors
 					vPos.push_back(pos_mismatch);
 					vSeq.push_back(letterMismatch);
 
@@ -281,6 +287,7 @@ int main(int argc, char ** argv){
 	unsigned char mismatch4;
 	int cmpt_bit = 8;
 
+	//For as many mismatches as there is in the vectors
 	for(a=0; a<vSize; a = a+cmpt_v){
 
 		//DEBUG
@@ -301,7 +308,7 @@ int main(int argc, char ** argv){
 		for(uint k=a; k<(a+cmpt_v); k++){
 			if(vPos[k] != -1){	//If not a separator
 				//Current position is written as a char for compression
-				char pos = '0' + vPos[k];
+				unsigned char pos = '0' + vPos[k];
 				streammismatchs<<pos;
 			}
 		}
