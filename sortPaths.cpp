@@ -237,14 +237,9 @@ int main(int argc, char ** argv){
 					//Retrieving the value and position of the mismatch
 					letterMismatch = reads[i].missmatches_encoding[j-1];
 					positionMismatch = reads[i].missmatches_encoding.substr(next_mismatch,j-1);
-					//If it's the first mismatch
-					if(next_mismatch == 0){
-						pos_mismatch = std::stoi(positionMismatch);
 
-					//Else calculate the difference between this position and the previous one	
-					}else{
-						pos_mismatch = std::stoi(positionMismatch) - pos_mismatch;
-					}
+					//Convert the ASCII to an int
+					pos_mismatch = std::stoi(positionMismatch);
 
 					//Push the values into the vectors
 					vPos.push_back(pos_mismatch);
@@ -286,13 +281,14 @@ int main(int argc, char ** argv){
 	uint a;
 	unsigned char mismatch4;
 	int cmpt_bit = 8;
+	//int position, pos_prec = 0;
 
 	//For as many mismatches as there is in the vectors
 	for(a=0; a<vSize; a = a+cmpt_v){
 
 		//DEBUG
 		if(DEBUG){
-			streammismatchs<<"==================== "<< a << " = " << endl << endl;
+			streammismatchs<<"==================== "<< a << " ===== " << endl << endl;
 		}
 
 		//If there's more than 1000 reads left to read, write 1000 reads
@@ -303,14 +299,23 @@ int main(int argc, char ** argv){
 			cmpt_v = vSize-a;
 		}
 
+
+		//DEBUG
+		if(DEBUG){streammismatchs<<"Positions : "<<endl<<endl;}
 		//Positions
 		//Loop for at most 1000 reads
-		for(uint k=a; k<(a+cmpt_v); k++){
+		uint k = a;
+		uint cmpt_written = a;
+		while(cmpt_written < (a+cmpt_v)){
 			if(vPos[k] != -1){	//If not a separator
 				//Current position is written as a char for compression
-				unsigned char pos = '0' + vPos[k];
+				char pos = '0' + vPos[k];
 				streammismatchs<<pos;
+				cmpt_written++;
+			}else{
+				streammismatchs<<';';
 			}
+			k++;
 		}
 
 		//DEBUG
@@ -320,7 +325,9 @@ int main(int argc, char ** argv){
 
 		//Mismatch Values
 		//Loop for at most 1000 reads
-		for(uint k=a; k<(a+cmpt_v); k++){
+		k = a;
+		cmpt_written = a;
+		while(cmpt_written < (a+cmpt_v)){
 			if(vSeq[k] != -1){	//If not a separator
 				//Mismatch value added to a character, after the character's bits are moved two places to the left
 				mismatch4 <<= 2;
@@ -332,7 +339,11 @@ int main(int argc, char ** argv){
 					streammismatchs<<mismatch4;
 					cmpt_bit = 8;
 				}
+
+				cmpt_written++;
 			}
+
+			k++;
 		}
 
 		//DEBUG
@@ -341,6 +352,7 @@ int main(int argc, char ** argv){
 		}
 
 	}
+
 
 
 	//Dernière marque pour la fin
