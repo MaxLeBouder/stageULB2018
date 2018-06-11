@@ -214,8 +214,8 @@ int main(int argc, char ** argv){
 				
 			}else{
 				//First position followed by a separator
-				if(reads[i].read_position >= 253 && reads[i].read_position <= 255){
-					//cout<<"Risque d'erreur valeur position ancre : "<<reads[i].anchor_number<<" pos : "<< reads[i].read_position <<endl;
+				if(DEBUG && (reads[i].read_position >= 253 && reads[i].read_position <= 255)){
+					cout<<"Risque d'erreur valeur position ancre : "<<reads[i].anchor_number<<" pos : "<< reads[i].read_position <<endl;
 				}
 				streampaths<<path_separator<<reads[i].path_direction<<":"<<reads[i].read_position;
 				first = true;
@@ -232,6 +232,12 @@ int main(int argc, char ** argv){
 		if(reads[i].missmatches_encoding.compare("") != 0){
 			//Mismatch reading and separation between the mismatch's position and value
 			for(j=0; j<reads[i].missmatches_encoding.size(); j++){
+				//Reading the mismatches parse until we find the ':' separator which indicates the end of a mismatch
+				//If we do find the separator, then the last letter before the separator is the mismatch value, which is a single letter
+				//And all the string between the last ':' separator and the letter is the mismatch's position
+				//When we read a mismatch, the position of the beginning of the potential next mismatch is kept in next_mismatch
+				//next_mismatch serves as the starting position when we want to make a substring to retrieve all the mismatch's position, until j-1, which is right before the mismatch's value
+
 				//Mismatch separator
 				if(reads[i].missmatches_encoding[j] == ':'){
 					//Retrieving the value and position of the mismatch
@@ -252,6 +258,7 @@ int main(int argc, char ** argv){
 
 
 		//Separator for the reads in the vectors
+		//Each -1 marks the end of a read, regardless of if it has mismatches or not
 		vPos.push_back(-1);
 		vSeq.push_back(-1);
 		
@@ -284,6 +291,7 @@ int main(int argc, char ** argv){
 	//int position, pos_prec = 0;
 
 	//For as many mismatches as there is in the vectors
+	//a is incremented with cmpt_v, which has a value of 1000 if there's 1000 or more reads left to read, or, if not, the remaining number of reads
 	for(a=0; a<vSize; a = a+cmpt_v){
 
 		//DEBUG
@@ -304,8 +312,8 @@ int main(int argc, char ** argv){
 		if(DEBUG){streammismatchs<<"Positions : "<<endl<<endl;}
 		//Positions
 		//Loop for at most 1000 reads
-		uint k = a;
-		uint cmpt_written = a;
+		uint k = a; //Position in the vector
+		uint cmpt_written = a; //Number of actually written mismatches positions
 		while(cmpt_written < (a+cmpt_v)){
 			if(vPos[k] != -1){	//If not a separator
 				//Current position is written as a char for compression
@@ -325,8 +333,8 @@ int main(int argc, char ** argv){
 
 		//Mismatch Values
 		//Loop for at most 1000 reads
-		k = a;
-		cmpt_written = a;
+		k = a; //Position in the vector
+		cmpt_written = a; //Number of actually written mismatches values
 		while(cmpt_written < (a+cmpt_v)){
 			if(vSeq[k] != -1){	//If not a separator
 				//Mismatch value added to a character, after the character's bits are moved two places to the left
@@ -355,7 +363,7 @@ int main(int argc, char ** argv){
 
 
 
-	//Dernière marque pour la fin
+	//Very last anchor separator
 	streampaths<<anchor_separator;
 	if(DEBUG){streampaths<<";";}
 }
